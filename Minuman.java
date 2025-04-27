@@ -1,5 +1,5 @@
 public class Minuman extends ItemMenu {
-    public Minuman(String kode, String nama, int harga) {
+    public Minuman(String kode, String nama, double harga) {
         super(kode, nama, harga);
         setPersenPajak();
     }
