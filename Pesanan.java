@@ -1,7 +1,7 @@
 public class Pesanan {
     private ItemMenu itemMenu;
     private int kuantitas;
-    private int totalHarga;
+    private double totalHarga;
     private double pajak;
 
     public Pesanan(ItemMenu itemMenu, int kuantitas) {
@@ -23,6 +23,7 @@ public class Pesanan {
         this.kuantitas = kuantitas;
         // hitung ulang total harga setelah kuantitas berubah
         hitungTotalHarga();
+        System.out.println("\n=> Berhasil menyimpan pesanan!");
     }
 
     private void hitungTotalHarga() {
@@ -31,7 +32,7 @@ public class Pesanan {
         hitungPajak();
     }
 
-    public int getTotalHarga() {
+    public double getTotalHarga() {
         hitungTotalHarga();
         return totalHarga;
     }
