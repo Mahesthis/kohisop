@@ -3,18 +3,18 @@ public class QRis extends Pembayaran {
 
     public QRis(double nominal, double saldo, double pajak) {
         super(nominal, 0.05, 0, pajak);
-        this.saldo = saldo; // BELUM
+        this.saldo = saldo;
     }
 
     @Override
     public boolean periksaPembayaran() {
-        totalBayar = hitungTotalBayarDenganPajak(); // BELUM
+        totalBayar = hitungTotalBayarDenganPajak();
         if (saldo >= totalBayar) {
-            saldo -= totalBayar; // BELUM
-            System.out.println("\nPembayaran berhasil menggunakan QRIS.");
-            return true; // BELUM
+            saldo -= totalBayar;
+            System.out.println("\n=> Pembayaran berhasil menggunakan QRIS.");
+            return true;
         } else {
-            System.out.println("\nSaldo tidak cukup untuk pembayaran menggunakan QRIS.\n");
+            System.out.println("\n=> Saldo tidak cukup untuk pembayaran menggunakan QRIS.\n");
             return false;
         }
     }
@@ -47,7 +47,7 @@ public class QRis extends Pembayaran {
 
     @Override
     public String getDeskripsi() {
-        deskripsi = "QRIS"; // Ragu output atau assign
+        deskripsi = "QRIS";
         return deskripsi;
     }
 }
