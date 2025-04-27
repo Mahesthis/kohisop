@@ -1,12 +1,12 @@
 public class Tunai extends Pembayaran {
 
     public Tunai(double nominal, double pajak) {
-        super(nominal, 0, 0, pajak); // BELUM
+        super(nominal, 0, 0, pajak);
     }
 
     @Override
     public boolean periksaPembayaran() {
-        System.out.println("Pembayaran berhasil menggunakan Tunai.");
+        System.out.println("=> Pembayaran berhasil menggunakan Tunai.");
         return true; // Pembayaran tunai selalu berhasil
     }
 
@@ -22,6 +22,7 @@ public class Tunai extends Pembayaran {
         return totalBayarDenganPajak;
     }
 
+    @Override
     public double getAdmin() {
         return admin;
     };

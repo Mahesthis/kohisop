@@ -1,10 +1,10 @@
 public abstract class ItemMenu {
     protected String kode;
     protected String nama;
-    protected int harga;
+    protected double harga;
     protected double pajak;
 
-    public ItemMenu(String kode, String nama, int harga) {
+    public ItemMenu(String kode, String nama, double harga) {
         this.kode = kode;
         this.nama = nama;
         this.harga = harga;
@@ -19,7 +19,7 @@ public abstract class ItemMenu {
         return nama;
     }
 
-    public int getHarga() {
+    public double getHarga() {
         return harga;
     }
 
