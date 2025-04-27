@@ -11,10 +11,10 @@ public class Emoney extends Pembayaran {
         double totalBayar = hitungTotalBayarDenganPajak();
         if (saldo >= totalBayar) {
             saldo -= totalBayar;
-            System.out.println("\nPembayaran berhasil menggunakan eMoney.");
+            System.out.println("\n=> Pembayaran berhasil menggunakan eMoney.");
             return true;
         } else {
-            System.out.println("\nSaldo tidak cukup untuk pembayaran menggunakan eMoney.");
+            System.out.println("\n=> Saldo tidak cukup untuk pembayaran menggunakan eMoney.");
             return false;
         }
     }
