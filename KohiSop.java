@@ -10,7 +10,7 @@ public class KohiSop {
     private int jumlahPesananMakanan;
     private int jumlahPesananMinuman;
     private int jumlahPesanan;
-    private int nominalTransaksi;
+    private double nominalTransaksi;
     private double totalPajak;
 
     public KohiSop() {
@@ -19,7 +19,7 @@ public class KohiSop {
                 new Minuman("EJ2", "Es Jeruk", 18000),
                 new Minuman("EC3", "Es Campur", 22000),
                 new Minuman("CD4", "Es Cendol", 24000),
-                new Minuman("TT5", "Teh Tarik", 20000),                
+                new Minuman("TT5", "Teh Tarik", 20000),
                 new Minuman("LT6", "Lemon Tea", 20000),
                 new Minuman("CL7", "Coffee Latte", 53000),
                 new Minuman("IC8", "Iced Cappuccino", 51000),
@@ -50,18 +50,11 @@ public class KohiSop {
     }
 
     public void pesan() {
-        tambahItemPesanan("Minuman");           //BELUM SEMUA
+        tambahItemPesanan("Minuman");
         tambahItemPesanan("Makanan");
 
-        for (int i = 0; i < jumlahPesanan; i++) {
-            nominalTransaksi += daftarPesanan[i].getTotalHarga(); //BELUM
-            totalPajak += daftarPesanan[i].getPajak(); //BELUM
-        }
-
+        // perhitungan pajak
         tampilkanPerhitunganPajak();
-
-        System.out.println("\n=> Nominal Transaksi (tanpa pajak): Rp" + nominalTransaksi);
-        System.out.println("=> Total Pajak: Rp" + totalPajak);
 
         // memilih channel pembayaran
         Pembayaran channel = pilihChannelPembayaran(nominalTransaksi, totalPajak);
@@ -85,32 +78,6 @@ public class KohiSop {
         bill.tampilkanTagihan();
     }
 
-    private void tampilkanMenu(String jenis) {
-        ItemMenu[] itemMenu = null;
-        if (jenis.equalsIgnoreCase("Makanan")) {
-            // memastikan string item diawali huruf kapital dan sisanya huruf kecil
-            jenis = "Makanan";
-            itemMenu = menuMakanan;
-        } else if (jenis.equalsIgnoreCase("Minuman")) {
-            // memastikan string item diawali huruf kapital dan sisanya huruf kecil
-            jenis = "Minuman";
-            itemMenu = menuMinuman;
-        } else {
-            System.out.println("\n=> Item tidak valid");
-            System.out.println("=> Item dalam menu adalah makanan atau minuman\n");
-            return;
-        }
-        System.out.println("============================================");
-        System.out.printf("|               Menu %s               |\n", jenis);
-        System.out.println("============================================");
-        System.out.printf("| %-4s | %-23s | %-7s |\n", "Kode", jenis, "Harga");
-        System.out.println("--------------------------------------------");
-        for (ItemMenu item : itemMenu) {
-            System.out.printf("| %-4s | %-23s | Rp%-5d |\n", item.getKode(), item.getNama(), item.getHarga());
-        }
-        System.out.println("============================================");
-    }
-
     private void tambahItemPesanan(String jenis) {
         boolean tambah = true;
         int jumlah;
@@ -124,27 +91,37 @@ public class KohiSop {
         }
         while (tambah) {
             if (jumlah == 5) {
-                System.out.printf("5 %s telah dipesan!\n", jenis.toLowerCase());
+                System.out.printf("=> 5 %s telah dipesan!\n\n", jenis.toLowerCase());
                 return;
-            }
-            tampilkanMenu(jenis);
-            System.out.printf("Inputkan kode %s yang ingin anda pesan: ", jenis.toLowerCase());
-            String kode = input.nextLine(); //RAGU
+            } // tidak perlu else karena jika if dijalankan akan langsung return
 
-            // jika s, maka skip
-            if (kode.equalsIgnoreCase("S")) {
+            System.out.println("===============================================");
+            System.out.printf("|                 Menu %s                |\n", jenis);
+            System.out.println("===============================================");
+            System.out.printf("| %-4s | %-23s | %-10s |\n", "Kode", jenis, "Harga");
+            System.out.println("-----------------------------------------------");
+            for (ItemMenu item : menu) {
+                System.out.printf("| %-4s | %-23s | Rp%-5.2f |\n", item.getKode(), item.getNama(), item.getHarga());
+            }
+            System.out.println("===============================================");
+
+            System.out.printf("Inputkan kode %s yang ingin anda pesan: ", jenis.toLowerCase());
+            String kode = input.nextLine();
+
+            if (kode.equalsIgnoreCase("CC")) {
+                stopProgram();
+            } else if (kode.equalsIgnoreCase("S")) { // jika s, maka skip
                 // pesan yang ditampilkan
                 if (jumlah == 0) {
-                    System.out.printf("Tidak ada %s yang dipesan\n", jenis.toLowerCase());
+                    System.out.printf("\n=> Tidak ada %s yang dipesan\n\n", jenis.toLowerCase());
                 } else {
                     System.out.printf("\n=> Selesai memesan %s!\n", jenis.toLowerCase());
                     tampilkanPesanan();
                 }
                 tambah = false;
-            } else if (kode.equalsIgnoreCase("CC")) {
-                stopProgram();  //SAMPAI SINI
             } else {
                 ItemMenu item = cariDiMenu(menu, kode);
+
                 if (item != null) {
                     // jika ternyata item sudah ada di daftar pesanan
                     if (itemDipesan(item)) {
@@ -153,32 +130,30 @@ public class KohiSop {
                         if (kuantitas > 0) {
                             // ganti kuantitas lama dengan kuantitas baru
                             daftarPesanan[cariIndexPesanan(item)].setKuantitas(kuantitas);
-                            System.out.println("\n=> Berhasil menyimpan pesanan!");
-                            tampilkanPesanan();
                             // jika kuantitas baru adalah 0, pesanan dibatalkan
                         } else {
-                            System.out.println("\n=> Batal memesan " + item.getNama());
                             // hapus pesanan dari daftar dan rapikan array daftar pesanan
                             hapusItemPesanan(cariIndexPesanan(item));
                             jumlah--;
-                            tampilkanPesanan();
                         }
                     } else {
+                        // polimorfisme disini, membuat objek pesanan dengan kuantitas default
+                        daftarPesanan[jumlahPesanan] = new Pesanan(item, 1);
+                        if (item instanceof Makanan) {
+                            jumlahPesananMakanan++;
+                        } else {
+                            jumlahPesananMinuman++;
+                        }
+                        jumlah++;
+                        jumlahPesanan++;
+
                         int kuantitas = inputKuantitas(item);
                         if (kuantitas > 0) {
-                            // polimorfisme disini
-                            daftarPesanan[jumlahPesanan] = new Pesanan(item, kuantitas);
-                            if (item instanceof Makanan) {
-                                jumlahPesananMakanan++;
-                            } else {
-                                jumlahPesananMinuman++;
-                            }
-                            jumlah++;
-                            jumlahPesanan++;
-                            System.out.println("\n=> Berhasil menyimpan pesanan!\n");
+                            daftarPesanan[jumlahPesanan - 1].setKuantitas(kuantitas);
                             tampilkanPesanan();
                         } else {
-                            System.out.println("\n=> Batal memesan " + item.getNama());
+                            hapusItemPesanan(jumlahPesanan - 1);
+                            jumlah--;
                         }
                     }
                 } else {
@@ -198,6 +173,7 @@ public class KohiSop {
     }
 
     private void hapusItemPesanan(int index) {
+        System.out.println("\n=> Batal memesan " + daftarPesanan[index].getItemMenu().getNama() + "\n");
         if (daftarPesanan[index].getItemMenu() instanceof Makanan) {
             jumlahPesananMakanan--;
         } else {
@@ -208,6 +184,7 @@ public class KohiSop {
         }
         daftarPesanan[jumlahPesanan - 1] = null;
         jumlahPesanan--;
+        tampilkanPesanan();
     }
 
     private int cariIndexPesanan(ItemMenu item) {
@@ -229,6 +206,7 @@ public class KohiSop {
     }
 
     private int inputKuantitas(ItemMenu item) {
+        tampilkanPesanan();
         while (true) {
             System.out.print("Inputkan kuantitas " + item.getNama() + " : ");
             String stringKuantitas = input.nextLine();
@@ -236,13 +214,12 @@ public class KohiSop {
                 stopProgram();
             }
             if (stringKuantitas.equalsIgnoreCase("S")) {
-                System.out.println("Batal memesan " + item.getNama());
                 return 0;
             }
             if (stringKuantitas.equalsIgnoreCase("")) {
                 // jika pengguna tidak input apapun (hanya enter saja) maka kuantitasnya
                 // default, yaitu 1
-                System.out.println("\n=> Menyimpan pesanan dengan kuantitas default");
+                System.out.print("\n=> Menyimpan pesanan dengan kuantitas default . . .");
                 return 1;
             }
             // tidak perlu else karena jika if dijalankan akan langsung return 0, yang bawah
@@ -262,7 +239,8 @@ public class KohiSop {
                     }
                 }
             } catch (NumberFormatException e) {
-                invalidInput();
+                System.out.println("\n=> Input tidak valid.");
+                System.out.println("=> Mohon inputkan jumlah pesanan berupa angka\n");
             }
         }
     }
@@ -271,7 +249,7 @@ public class KohiSop {
         if (jumlahPesanan == 0) {
             return;
         }
-        System.out.println("==============================================");
+        System.out.println("\n==============================================");
         System.out.println("|               Daftar Pesanan               |");
         System.out.println("==============================================");
         if (jumlahPesananMinuman > 0) {
@@ -307,27 +285,32 @@ public class KohiSop {
 
     private void tampilkanPerhitunganPajak() {
         if (jumlahPesanan == 0) {
-            System.out.println("Tidak ada pesanan untuk dihitung pajaknya.");
+            System.out.println("=> Tidak ada pesanan.");
+            System.out.println("=> Program berhenti . . .");
+            System.exit(0);
             return;
         }
 
-        System.out.println("===========================================================================");
-        System.out.println("|                       Perhitungan Pajak Tiap Item                       |");
-        System.out.println("===========================================================================");
-        System.out.printf("| %-23s | %-3s | %-7s | %-7s | %-10s |\n", "Kode", "Nama Item", "Qty", "Harga",
+        System.out.println("=========================================================================");
+        System.out.println("|                      Perhitungan Pajak Tiap Item                      |");
+        System.out.println("=========================================================================");
+        System.out.printf("| %-23s | %-3s | %-10s | %-7s | %-12s |\n", "Nama Item", "Qty", "Harga",
                 "Pajak (%)", "Pajak");
-        System.out.println("---------------------------------------------------------------------------");
+        System.out.println("-------------------------------------------------------------------------");
 
         for (int i = 0; i < jumlahPesanan; i++) {
             Pesanan pesanan = daftarPesanan[i];
             ItemMenu item = pesanan.getItemMenu();
-            int pajak = (int) (pesanan.getPajak());
+            double pajak = pesanan.getPajak();
             int persenPajak = (int) (pesanan.getPersenPajak() * 100);
-            System.out.printf("| %-23s | %-3s | Rp%-5d | %-7d%%  | Rp%-8d |\n",
+            nominalTransaksi += pesanan.getTotalHarga();
+            totalPajak += pesanan.getPajak();
+            System.out.printf("| %-23s | %-3s | Rp%-5.2f | %-7d%%  | Rp%-10.2f |\n",
                     item.getNama(), pesanan.getKuantitas(), item.getHarga(), persenPajak, pajak);
         }
-
-        System.out.println("===========================================================================");
+        System.out.println("-------------------------------------------------------------------------");
+        System.out.printf("| Total Pajak             : Rp%-41.2f |\n", totalPajak);
+        System.out.println("=========================================================================");
     }
 
     public Pembayaran pilihChannelPembayaran(double nominal, double totalPajak) {
@@ -368,6 +351,7 @@ public class KohiSop {
                         System.out.println("                    QRIS                    ");
                         System.out.println("--------------------------------------------");
                         System.out.printf("%-30s%s%.2f\n", "Nominal pembayaran", ": Rp", (nominal + totalPajak));
+                        System.out.println("--------------------------------------------");
 
                         double saldoQRIS = 0;
                         while (true) {
@@ -389,7 +373,9 @@ public class KohiSop {
                         System.out.println("                   eMoney                   ");
                         System.out.println("--------------------------------------------");
                         System.out.printf("%-30s%s%.2f\n", "Nominal pembayaran", ": Rp", (nominal + totalPajak));
-                        System.out.printf("%-30s%s\n", "Biaya admin", ": Rp20000");
+                        System.out.printf("%-30s%s\n", "Biaya admin", ": Rp20000.00");
+                        System.out.printf("%-30s%s%.2f\n", "Total", ": Rp", (nominal + totalPajak + 20000));
+                        System.out.println("--------------------------------------------");
 
                         double saldoEMoney = 0;
                         while (true) {
@@ -408,19 +394,19 @@ public class KohiSop {
                         break;
                     default:
                         invalidInput();
-                        continue;
                 }
 
             }
 
-            if (pembayaran != null) {
-                if (pembayaran.periksaPembayaran()) {
-                    System.out.println("Diskon yang diterapkan: " + ((int) (pembayaran.getDiskon() * 100)) + "%");
-                    System.out.println("--------------------------------------------");
-                    break; // Keluar dari loop jika pembayaran berhasil
-                } else {
-                    System.out.println("Silakan pilih channel pembayaran lain atau tambah saldo Anda.");
+            if (pembayaran.periksaPembayaran()) {
+                if (pembayaran instanceof Emoney || pembayaran instanceof QRis) {
+                    System.out.println(
+                            "=> Anda mendapat diskon sebesar " + ((int) (pembayaran.getDiskon() * 100)) + "%");
                 }
+                System.out.println("--------------------------------------------");
+                break; // Keluar dari loop jika pembayaran berhasil
+            } else {
+                System.out.println("=> Silakan pilih channel pembayaran lain atau tambah saldo Anda.");
             }
         }
         return pembayaran;
@@ -475,8 +461,8 @@ public class KohiSop {
                     invalidInput();
             }
         }
-        System.out.println("Berhasil memilih mata uang!");
-        System.out.printf("Mata uang : %s\n\n", mataUang.getSimbol());
+        System.out.println("\n=> Berhasil memilih mata uang!");
+        System.out.printf("=> Anda memilih mata uang %s\n\n", mataUang.getSimbol());
         return mataUang;
     }
 
